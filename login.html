@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cravit Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-orange-600 via-yellow-500 to-orange-700 flex items-center justify-center min-h-screen text-white">
+
+  <div class="bg-white/20 glass p-8 rounded-xl w-full max-w-md">
+    <h2 class="text-3xl font-bold text-center mb-6 text-orange-600">Login to Cravit🍔</h2>
+
+    <div class="space-y-4">
+      <input id="email" type="email" placeholder="Enter your Email" class="w-full p-3 rounded-lg text-black" />
+      <input id="password" type="password" placeholder="Password" class="w-full p-3 rounded-lg text-black" />
+      <button onclick="loginUser()" class="w-full bg-orange-600 py-3 rounded-lg hover:bg-orange-700 transition">Login</button>
+      <p class="text-center text-sm">Don't have an account? <a href="register.html" class="underline">Register</a></p>
+    </div>
+  </div>
+
+  <script>
+    async function loginUser() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const res = await fetch('http://127.0.0.1:5000/api/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email,password})
+      });
+      const data = await res.json();
+      if(data.status==='success') {
+        localStorage.setItem('loggedInUser', email);
+        alert('Logged in successfully!');
+        window.location.href = 'summa.html';
+      } else {
+        alert('Invalid credentials');
+      }
+    }
+  </script>
+
+</body>
+</html>

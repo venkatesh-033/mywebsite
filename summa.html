@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cravit – When you crave it, Cravit.</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .glass {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-orange-600 via-yellow-500 to-orange-700 min-h-screen text-white">
+
+ <!-- Chatbot -->
+<div id="chatBot" class="fixed bottom-5 right-5 z-50">
+  <button onclick="toggleChat()" class="bg-orange-600 text-white p-3 rounded-full shadow-lg hover:bg-orange-700">
+    💬
+  </button>
+  <div id="chatWindow" class="hidden bg-white text-black w-72 h-96 rounded-2xl shadow-xl flex flex-col">
+    <div class="bg-orange-600 text-white p-3 rounded-t-2xl flex justify-between items-center">
+      <span>🤖 Cravit Support</span>
+      <button onclick="toggleChat()">✖</button>
+    </div>
+    <div id="chatMessages" class="flex-1 p-3 overflow-y-auto text-sm space-y-2"></div>
+    <div class="p-2 flex">
+      <input id="chatInput" type="text" placeholder="Type a message..."
+        class="flex-1 border rounded-lg px-2 py-1 text-sm" 
+        onkeydown="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()" class="ml-2 bg-orange-600 text-white px-3 py-1 rounded-lg">Send</button>
+    </div>
+  </div>
+</div>
+ 
+  <!-- Food Details Modal -->
+<div id="foodModal" class="fixed inset-0 bg-black/70 hidden justify-center items-center z-50">
+  <div class="bg-white text-black rounded-2xl w-11/12 md:w-1/2 p-6 relative">
+    <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-500 hover:text-black text-xl">✖</button>
+    <img id="modalImage" src="" alt="Food Image" class="rounded-lg w-full h-56 object-cover mb-4">
+    <h3 id="modalName" class="text-2xl font-bold text-orange-600"></h3>
+    <p id="modalDesc" class="text-gray-700 mt-2"></p>
+    <p id="modalPrice" class="text-lg font-semibold mt-4"></p>
+    <button id="modalAddBtn" class="mt-6 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700">
+      Add to Cart
+    </button>
+  </div>
+</div>
+
+
+  <!-- Navbar -->
+  <header class="flex justify-between items-center px-6 py-4 glass sticky top-0 z-50">
+    <h1 class="text-2xl font-bold" style="color: yellow;">🥘 Cravit</h1>
+    <nav class="space-x-6 hidden md:block">
+      <a style= "color: black;"href="#home" class="hover:text-yellow-300">Home</a>
+      <a style= "color: black;"href="#menu" class="hover:text-yellow-300">Menu</a>
+      <a style= "color: black;"href="#cart" class="hover:text-yellow-300">Cart</a>
+      <a style= "color: black;"href="#tracking" class="hover:text-yellow-300">Order Tracking</a>
+      <a style= "color: black;"href="#about" class="hover:text-yellow-300">About</a>
+      <a style= "color: black;"href="#contact" class="hover:text-yellow-300">Contact</a>
+    </nav>
+   <button onclick="logout()" class="bg-red-500 px-4 py-1 rounded-lg hover:bg-red-600">Logout</button>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="home" class="flex flex-col md:flex-row items-center justify-between px-8 py-16">
+    <div>
+      <h2 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">When you crave it,<br><span class="text-yellow-300">Cravit.</span></h2>
+      <p class="mb-6 text-lg text-gray-100 max-w-md">Next-gen food delivery platform with AI-driven recommendations and real-time tracking.</p>
+      <a href="#menu" class="bg-yellow-400 text-black px-6 py-3 rounded-2xl text-lg font-semibold hover:scale-105 transition">Start Your Food Journey</a>
+    </div>
+    <img src="C:\Users\venka\OneDrive\Desktop\DBMS PROJECT\static\t1.jpg" alt="Food Banner" class="rounded-2xl mt-10 md:mt-0 shadow-lg w-full md:w-1/2">
+  </section>
+
+  <!-- Menu Section -->
+  <section id="menu" class="px-6 py-12 bg-white text-black">
+    <h3 class="text-4xl font-bold text-center text-orange-600 mb-10">🍴 Our Menu</h3>
+    <div id="menuGrid" class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
+  </section>
+
+  <!-- Checkout Modal -->
+<div id="checkoutModal" class="fixed inset-0 bg-black/70 hidden justify-center items-center z-50">
+  <div class="bg-white text-black rounded-2xl w-11/12 md:w-1/3 p-6 relative">
+    <button onclick="closeCheckoutModal()" class="absolute top-3 right-3 text-gray-500 hover:text-black text-xl">✖</button>
+    <h3 class="text-2xl font-bold text-center text-orange-600 mb-4">Checkout Details</h3>
+    <input id="checkoutName" placeholder="Full Name" class="w-full border p-2 mb-2 rounded">
+    <input id="checkoutPhone" placeholder="Phone Number" class="w-full border p-2 mb-2 rounded">
+    <textarea id="checkoutAddress" placeholder="Delivery Address" class="w-full border p-2 mb-4 rounded"></textarea>
+    <button onclick="placeOrder()" class="bg-orange-600 text-white px-6 py-2 rounded-lg w-full">Place Order</button>
+  </div>
+</div>
+
+
+  <!-- Cart Section -->
+<section id="cart" class="px-6 py-12 bg-gradient-to-br from-yellow-500 via-orange-500 to-red-500">
+  <h3 class="text-4xl font-bold text-center mb-6">🛒 Your Cart</h3>
+  <div id="cartItems" class="max-w-3xl mx-auto bg-white/20 glass p-6 rounded-xl text-white"></div>
+  <p id="cartTotal" class="text-center mt-4 text-lg font-semibold"></p>
+  <div class="text-center mt-6">
+    <button onclick="openCheckoutModal()" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">Checkout</button>
+  </div>
+</section>
+
+<!-- Order Tracking -->
+<section id="tracking" class="px-6 py-12 bg-white text-black">
+  <h3 class="text-4xl font-bold text-center text-orange-600 mb-10">📦 Order Tracking</h3>
+  <div id="ordersList" class="max-w-4xl mx-auto space-y-4"></div>
+</section>
+
+
+  <!-- Footer -->
+  <footer class="px-6 py-8 text-center bg-black/60">
+    <p class="text-sm">📍 23, Senthil Street, Saravanampatti, Coimbatore – 641049, Tamil Nadu</p>
+    <p class="text-sm">📞 +91 99999 77777 | ✉️ contact@cravit.in</p>
+    <p class="text-xs mt-2">© 2025 Cravit. Built with ❤️ in India.</p>
+  </footer>
+
+  <!-- Script -->
+<script>
+
+    
+  // Cart from localStorage
+  let cart = JSON.parse(localStorage.getItem('cravit_cart') || '[]');
+  const menuGrid = document.getElementById('menuGrid');
+  const cartItems = document.getElementById('cartItems');
+  const cartTotal = document.getElementById('cartTotal');
+  const email = localStorage.getItem("loggedInUser");
+
+window.addEventListener("DOMContentLoaded", () => {
+  if (!email) {
+    alert("You are not logged in!");
+    window.location.href = "login.html";
+  }
+});
+
+
+  // Save cart to localStorage
+function saveCart() { localStorage.setItem('cravit_cart', JSON.stringify(cart)); }
+function renderCart() {
+  if (cart.length === 0) {
+    cartItems.innerHTML = "<p>Your cart is empty.</p>";
+    cartTotal.textContent = "";
+    return;
+  }
+  let total = 0;
+  cartItems.innerHTML = cart.map(c => {
+    total += c.price * c.qty;
+    return `<div class='flex justify-between'><span>${c.name} (x${c.qty})</span><span>₹${c.price*c.qty}</span></div>`;
+  }).join('');
+  cartTotal.textContent = "Total: ₹" + total;
+}
+
+  // Fetch menu from backend
+  let DISHES = [];
+async function fetchMenu() {
+  try {
+    const res = await fetch('http://127.0.0.1:5000/api/menu');
+    if (!res.ok) throw new Error('Failed to fetch menu');
+    DISHES = await res.json();
+    console.log("Menu loaded:", DISHES); // 🔍 debug
+    renderMenu();
+  } catch (err) {
+    console.error(err);
+    alert('Could not load menu items.');
+  }
+}
+
+  // Toggle chatbot
+function toggleChat() {
+  document.getElementById("chatWindow").classList.toggle("hidden");
+}
+
+// Send & auto-reply
+function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const chatBox = document.getElementById("chatMessages");
+  chatBox.innerHTML += `<div class="text-right"><span class="bg-orange-200 px-2 py-1 rounded-lg">${msg}</span></div>`;
+  input.value = "";
+
+  // Auto-response
+  setTimeout(() => {
+    let reply = "🤖 Sorry, I didn’t understand that.";
+    if (msg.toLowerCase().includes("menu")) reply = "🍴 You can check our Menu section above!";
+    else if (msg.toLowerCase().includes("order")) reply = "🛒 You can track your orders in the Order Tracking section.";
+    else if (msg.toLowerCase().includes("hello")) reply = "👋 Hi! How can I assist you today?";
+    else if (msg.toLowerCase().includes("contact")) reply = "📞 You can reach us at +91 99999 77777.";
+
+    chatBox.innerHTML += `<div class="text-left"><span class="bg-gray-200 px-2 py-1 rounded-lg">${reply}</span></div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, 800);
+}
+
+
+  // Render menu
+  // Render menu with modal trigger
+function renderMenu() {
+  menuGrid.innerHTML = DISHES.map(dish => `
+    <div onclick="openModal(${dish.item_id})" 
+         class="glass rounded-xl overflow-hidden shadow-lg hover:scale-105 transition cursor-pointer">
+      <img src="${dish.image_url}" alt="${dish.name}" class="h-40 w-full object-cover">
+      <div class="p-4">
+        <h4 class="text-lg font-semibold text-orange-600">${dish.name}</h4>
+        <p class="text-sm text-gray-700 line-clamp-2">${dish.description}</p>
+        <p class="mt-2 font-bold">₹${dish.price}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Open modal
+function openModal(id) {
+  const dish = DISHES.find(d => d.item_id === id);
+  document.getElementById("modalImage").src = dish.image_url;
+  document.getElementById("modalName").textContent = dish.name;
+  document.getElementById("modalDesc").textContent = dish.description;
+  document.getElementById("modalPrice").textContent = "₹" + dish.price;
+  document.getElementById("modalAddBtn").onclick = () => { addToCart(id); closeModal(); };
+  document.getElementById("foodModal").classList.remove("hidden");
+  document.getElementById("foodModal").classList.add("flex");
+}
+
+// Close modal
+function closeModal() {
+  document.getElementById("foodModal").classList.remove("flex");
+  document.getElementById("foodModal").classList.add("hidden");
+}
+
+
+
+  // Add item to cart
+  function addToCart(id) {
+  const item = DISHES.find(d => d.item_id === id);
+  const existing = cart.find(c => c.item_id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...item, qty: 1 });
+  saveCart();
+  renderCart();
+}
+
+
+  // Render cart
+  function renderCart() {
+    if (cart.length === 0) {
+      cartItems.innerHTML = "<p>Your cart is empty.</p>";
+      cartTotal.textContent = "";
+      return;
+    }
+    cartItems.innerHTML = cart.map(c => `
+  <div class="flex justify-between items-center mb-2">
+    <span>${c.name} (x${c.qty})</span>
+    <span>₹${c.price * c.qty}</span>
+  </div>
+`).join('');
+  }
+
+  // Checkout
+function openCheckoutModal() {
+  if (cart.length === 0) return alert("Cart is empty!");
+  document.getElementById('checkoutModal').classList.remove('hidden');
+  document.getElementById('checkoutModal').classList.add('flex');
+}
+
+function closeCheckoutModal() {
+  document.getElementById('checkoutModal').classList.add('hidden');
+}
+
+async function placeOrder() {
+  const name = document.getElementById('checkoutName').value.trim();
+  const phone = document.getElementById('checkoutPhone').value.trim();
+  const address = document.getElementById('checkoutAddress').value.trim();
+  const email = localStorage.getItem("loggedInUser"); // ✅ moved here for safety
+
+  if (!name || !phone || !address) return alert("Please fill all details.");
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/place_order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name, phone, address, cart })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+     alert(`✅ Order placed successfully!\nYour Order ID is #${data.order_id}.\nTrack it in the 'Order Tracking' section below.`);
+      cart = [];
+      saveCart();
+      renderCart();
+      closeCheckoutModal();
+      fetchOrders();
+    } else {
+      alert("Error placing order.");
+      console.error(data);
+    }
+  } catch (err) {
+    console.error("Order failed:", err);
+    alert("Server error while placing order.");
+  }
+}
+
+
+async function fetchOrders() {
+  const res = await fetch(`http://127.0.0.1:5000/api/orders/${email}`);
+  const orders = await res.json();
+  const ordersList = document.getElementById("ordersList");
+  if (orders.length === 0) {
+    ordersList.innerHTML = "<p class='text-center text-gray-500'>No orders found.</p>";
+    return;
+  }
+  ordersList.innerHTML = orders.map(o => `
+    <div class='p-4 rounded-xl border shadow'>
+      <h4 class='font-bold text-orange-600'>Order #${o.order_id}</h4>
+      <p><b>Name:</b> ${o.name}</p>
+      <p><b>Address:</b> ${o.address}</p>
+      <p><b>Phone:</b> ${o.phone}</p>
+      <p><b>Status:</b> ${o.status}</p>
+      <p><b>Total:</b> ₹${o.total_amount}</p>
+    </div>`).join('');
+}
+
+
+  // Logout (demo)
+  function logout() {
+    localStorage.removeItem('loggedInUser'); // remove login flag
+    alert("Logged out successfully!");        // popup message
+    window.location.href = "login.html";     // redirect to login page
+}
+
+
+  // Login example
+  async function loginUser() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const res = await fetch('http://127.0.0.1:5000/api/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email,password})
+    });
+    const data = await res.json();
+    if(data.status==='success') {
+      localStorage.setItem('loggedInUser', email);
+      alert('Logged in successfully!');
+      window.location.href = 'index.html';
+    } else {
+      alert('Invalid credentials');
+    }
+  }
+
+  // Check login
+  if (!localStorage.getItem("loggedInUser")) {
+    window.location.href = "login.html";
+  }
+
+  // Init
+  window.addEventListener('DOMContentLoaded', () => {
+    fetchMenu();
+    renderCart();
+    fetchOrders();
+  });
+
+</script>
+
+</body>
+</html>
